@@ -206,6 +206,7 @@ module Turtle.Prelude (
     , shells
     , inproc
     , inshell
+    , sshInshell
     , inprocWithErr
     , inshellWithErr
     , procStrict
@@ -674,6 +675,23 @@ inshell
     -> Shell Line
     -- ^ Lines of standard output
 inshell cmd = stream (Process.shell (unpack cmd))
+
+{-| Run a command line on the specified server using the shell and ssh, streaming @stdout@ as lines of `Text`
+
+    The command inherits @stderr@ for the current process
+-}
+
+sshInshell
+  :: Text
+  -- ^ Server to connect to
+  -> Text
+  -- ^ command to run
+  -> Shell Line
+  -- ^ Lines of standard input
+  -> Shell Line
+  -- ^ Lines of standard output
+sshInshell server command = inshell ("ssh " <> server <> " " <> (surroundWithQuotes command))
+  where surroundWithQuotes txt = "\"" <> txt <> "\""
 
 waitForProcessThrows :: Process.ProcessHandle -> IO ()
 waitForProcessThrows ph = do
